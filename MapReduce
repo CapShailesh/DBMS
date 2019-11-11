@@ -1,0 +1,254 @@
+ db.createCollection("Coaching")
+{ "ok" : 1 }
+> db.Coaching.insert({class : "DBMS:, students : [{name : "Shailesh", age : 20}, {name : "Virat", age : 21}], cost : 2000, name : "Tony"})
+2019-11-01T09:41:56.335+0530 E  QUERY    [js] uncaught exception: SyntaxError: missing } after property list :
+@(shell):1:57
+> db.Coaching.insert({class : "DBMS", students : [{name : "Shailesh", age : 20}, {name : "Virat", age : 21}], cost : 2000, name : "Tony"})
+WriteResult({ "nInserted" : 1 })
+> db.Coaching.insert({class : "CN", students : [{name : "Shailesh", age : 20}, {name : "Rohit", age : 22}], cost : 2500, name : "Rogers"})
+WriteResult({ "nInserted" : 1 })
+> db.Coaching.insert({class : "ADS", students : [{name : "Virat", age : 21}, {name : "Rohit", age : 22}], cost : 3000, name : "Tony"})
+WriteResult({ "nInserted" : 1 })
+> db.Coaching.insert({class : "DSA", students : [{name : "Shailesh", age : 20}, {name : "Virat", age : 21}, {name : "Rohit", age : 22}], cost : 4000, name : "Larry"})
+WriteResult({ "nInserted" : 1 })
+> db.Coaching.insert({class : "MP", students : [{name : "Shailesh", age : 20}, {name : "Virat", age : 22}], cost : 2700, name : "Rogers"})
+WriteResult({ "nInserted" : 1 })
+> db.Coaching.find().pretty()
+{
+	"_id" : ObjectId("5dbbb09af302c845f79bed62"),
+	"class" : "DBMS",
+	"students" : [
+		{
+			"name" : "Shailesh",
+			"age" : 20
+		},
+		{
+			"name" : "Virat",
+			"age" : 21
+		}
+	],
+	"cost" : 2000,
+	"name" : "Tony"
+}
+{
+	"_id" : ObjectId("5dbbb0c0f302c845f79bed63"),
+	"class" : "CN",
+	"students" : [
+		{
+			"name" : "Shailesh",
+			"age" : 20
+		},
+		{
+			"name" : "Rohit",
+			"age" : 22
+		}
+	],
+	"cost" : 2500,
+	"name" : "Rogers"
+}
+{
+	"_id" : ObjectId("5dbbb0ecf302c845f79bed64"),
+	"class" : "ADS",
+	"students" : [
+		{
+			"name" : "Virat",
+			"age" : 21
+		},
+		{
+			"name" : "Rohit",
+			"age" : 22
+		}
+	],
+	"cost" : 3000,
+	"name" : "Tony"
+}
+{
+	"_id" : ObjectId("5dbbb17bf302c845f79bed65"),
+	"class" : "DSA",
+	"students" : [
+		{
+			"name" : "Shailesh",
+			"age" : 20
+		},
+		{
+			"name" : "Virat",
+			"age" : 21
+		},
+		{
+			"name" : "Rohit",
+			"age" : 22
+		}
+	],
+	"cost" : 4000,
+	"name" : "Larry"
+}
+{
+	"_id" : ObjectId("5dbbb1adf302c845f79bed66"),
+	"class" : "MP",
+	"students" : [
+		{
+			"name" : "Shailesh",
+			"age" : 20
+		},
+		{
+			"name" : "Virat",
+			"age" : 22
+		}
+	],
+	"cost" : 2700,
+	"name" : "Rogers"
+}
+> 
+
+1.Money earned by each professor
+ db.Coaching.mapReduce(function(){ emit(this.name, this.cost)}, function(name, cost){return Array.sum(cost)}, {out : "earnings"})
+{
+	"result" : "earnings",
+	"timeMillis" : 786,
+	"counts" : {
+		"input" : 5,
+		"emit" : 5,
+		"reduce" : 2,
+		"output" : 3
+	},
+	"ok" : 1
+}
+
+ db.Coaching.mapReduce(function(){ emit(this.name, this.cost)}, function(name, cost){return Array.sum(cost)}, {out : "earnings"}).find().pretty()
+{ "_id" : "Larry", "value" : 4000 }
+{ "_id" : "Rogers", "value" : 5200 }
+{ "_id" : "Tony", "value" : 5000 }
+
+
+db.earnings.find().sort({value : 1})
+{ "_id" : "Larry", "value" : 4000 }
+{ "_id" : "Tony", "value" : 5000 }
+{ "_id" : "Rogers", "value" : 5200 }
+
+2.Average money per class
+> db.Coaching.mapReduce(function(){ emit(this.name, this.cost)}, function(name, cost){return Array.avg(cost)}, {out : "earnings", $sort : { value : 1}}).find().pretty()
+{ "_id" : "Larry", "value" : 4000 }
+{ "_id" : "Rogers", "value" : 2600 }
+{ "_id" : "Tony", "value" : 2500 }
+
+3. Number of class attended by each student
+db.Coaching.mapReduce(
+        function()
+        {
+                for(i = 0;i <this.students.length;i++)
+                {
+                        var student = this.students[i];
+                        emit(student.name, 1)
+                }
+        },
+        function(student, values)
+        {
+                count = 0;
+                for(i = 0; i<values.length;i++)
+                {
+                  count += values[i];
+                }
+                return count;
+        }, 
+        {out : "attend"})
+        
+{
+"result" : "attend",
+"timeMillis" : 2082,
+"counts" : {
+	"input" : 5,
+	"emit" : 11,
+	"reduce" : 3,
+	"output" : 3
+},
+"ok" : 1
+}
+
+> db.Coaching.mapReduce(function(){ for(i = 0;i <this.students.length;i++){ var student = this.students[i]; emit(student.name, 1)}}, function(student, values){ return Array.sum(values); }, {out : "attend"}).find().pretty()
+{ "_id" : "Rohit", "value" : 3 }
+{ "_id" : "Shailesh", "value" : 4 }
+{ "_id" : "Virat", "value" : 4 }
+
+4.Number of classes per professor
+> db.Coaching.mapReduce(function(){emit(this.name, 1)}, function(name, value){
+... return Array.sum(value)}, {out : "No_of_classes"})
+{
+	"result" : "No_of_classes",
+	"timeMillis" : 594,
+	"counts" : {
+		"input" : 5,
+		"emit" : 5,
+		"reduce" : 2,
+		"output" : 3
+	},
+	"ok" : 1
+}
+> db.Coaching.mapReduce(function(){emit(this.name, 1)}, function(name, value){ return Array.sum(value)}, {out : "No_of_classes"}).find()
+{ "_id" : "Larry", "value" : 1 }
+{ "_id" : "Rogers", "value" : 2 }
+{ "_id" : "Tony", "value" : 2 }
+
+
+> db.Coaching.mapReduce(function(){ emit(this.name, 1)}, function(name, value){var count=0; for(i = 0;i<value.length;i++){
+... count += value[i];
+... }
+... return count;
+... },
+... {out : "no_class"})
+{
+	"result" : "no_class",
+	"timeMillis" : 441,
+	"counts" : {
+		"input" : 5,
+		"emit" : 5,
+		"reduce" : 2,
+		"output" : 3
+	},
+	"ok" : 1
+}
+> db.Coaching.mapReduce(function(){ emit(this.name, 1)}, function(name, value){var count=0; for(i = 0;i<value.length;i++){ count += value[i]; } return count; }, {out : "no_class"}).find()
+{ "_id" : "Larry", "value" : 1 }
+{ "_id" : "Rogers", "value" : 2 }
+{ "_id" : "Tony", "value" : 2 }
+> 
+
+5.Cost for each student
+> db.Coaching.mapReduce(function(){ for(var i = 0; i< this.students.length;i++){ emit(this.students[i].name, this.cost)}}, function(name, value){ return Array.sum(value)}, {out : "money_per_student"})
+{
+	"result" : "money_per_student",
+	"timeMillis" : 826,
+	"counts" : {
+		"input" : 5,
+		"emit" : 11,
+		"reduce" : 3,
+		"output" : 3
+	},
+	"ok" : 1
+}
+> db.Coaching.mapReduce(function(){ for(var i = 0; i< this.students.length;i++){ emit(this.students[i].name, this.cost)}}, function(name, value){ return Array.sum(value)}, {out : "money_per_student"}).find()
+{ "_id" : "Rohit", "value" : 9500 }
+{ "_id" : "Shailesh", "value" : 11200 }
+{ "_id" : "Virat", "value" : 11700 }
+> 
+        
+For specific subject
+> db.Coaching.mapReduce(function(){ for(var i = 0; i< this.students.length;i++){ emit(this.students[i].name, this.cost)}}, function(name, value){ return Array.sum(value)}, {query : {name : "Tony"}, out : "money_per_student"}).find().sort({value : 1})
+{ "_id" : "Shailesh", "value" : 2000 }
+{ "_id" : "Rohit", "value" : 3000 }
+{ "_id" : "Virat", "value" : 5000 }
+
+        
+        
+         db.student.mapReduce(function(){
+         var max = 0;
+         for(i=0;i<this.subject.length;i++)
+         {
+         if(this.subject[i].marks > max)
+         {
+                emit(this.name, this.subject[i].marks)
+                max = this.subject[i].marks;
+         }
+         }}, function(name, value){return Array.sum(value)}, {out : "jj"}).find()
+
+        
+

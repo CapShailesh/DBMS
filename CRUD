@@ -1,0 +1,387 @@
+##########################################CREATE COLLECTION####################################################
+
+db.createCollection("Demo")
+{ "ok" : 1 }
+
+Syntax
+
+Basic syntax of createCollection() command is as follows −
+
+db.createCollection(name, options)
+
+##########################################DROP COLLECTION####################################################
+
+> db.Demo.drop()
+true
+
+##########################################SEE COLLECTION####################################################
+show collections  
+
+##########################################INSERT A DOCUMENT####################################################
+Syntax
+
+    >db.COLLECTION_NAME.insert(document)  
+    
+###INSERT 
+        db.Classes.insert({ subject : "DBMS", trainer : { name : "Shailesh", age : 20, mobile : 9421663873 }, lenght : "20 days"})              
+        WriteResult({ "nInserted" : 1 })
+
+###INSERT ONE
+        db.Classes.insertOne({subject : "CN", trainer : { name : "Virat", age : 31, mobile : 9421667788 }, length : "30 days"})
+{
+	"acknowledged" : true,
+	"insertedId" : ObjectId("5db94dffed3cdd68c764f6d4")
+}
+
+###INSERT ARRAY
+
+ db.Classes.insert([{subject : "OOP", trainer : { name : "Rohit", age : 30}, length : "15days", timing : ["1:00 pm", "5:00 pm"]}, { subject : "ADS", trainer : { name : "Dhoni", age : 40, mobile : 9421564732}, length : "30 days"}])
+BulkWriteResult({
+	"writeErrors" : [ ],
+	"writeConcernErrors" : [ ],
+	"nInserted" : 2,
+	"nUpserted" : 0,
+	"nMatched" : 0,
+	"nModified" : 0,
+	"nRemoved" : 0,
+	"upserted" : [ ]
+})
+
+##########################################FIND ####################################################
+Syntax
+
+The basic syntax of find() method is as follows −
+
+>db.COLLECTION_NAME.find()
+
+> db.Classes.find().pretty()
+{
+	"_id" : ObjectId("5db9515145079df59365bd5f"),
+	"subject" : "OOP",
+	"trainer" : {
+		"name" : "Rohit",
+		"age" : 30
+	},
+	"length" : "15days",
+	"timing" : [
+		"1:00 pm",
+		"5:00 pm"
+	]
+}
+{
+	"_id" : ObjectId("5db9515145079df59365bd60"),
+	"subject" : "ADS",
+	"trainer" : {
+		"name" : "Dhoni",
+		"age" : 40,
+		"mobile" : 9421564732
+	},
+	"length" : "30 days"
+}
+{
+	"_id" : ObjectId("5db951b745079df59365bd61"),
+	"subject" : "DBMS",
+	"trainer" : {
+		"name" : "Shailesh",
+		"age" : 20,
+		"mobile" : 9421663873
+	},
+	"lenght" : "20 days"
+}
+{
+	"_id" : ObjectId("5db951d245079df59365bd62"),
+	"subject" : "CN",
+	"trainer" : {
+		"name" : "Virat",
+		"age" : 31,
+		"mobile" : 9421667788
+	},
+	"length" : "30 days"
+}
+
+###AND
+
+db.mycol.find(
+   {
+      $and: [
+         {key1: value1}, {key2:value2}
+      ]
+   }
+).pretty()
+
+ db.Classes.find({length : "30 days"})
+{ "_id" : ObjectId("5db9515145079df59365bd60"), "subject" : "ADS", "trainer" : { "name" : "Dhoni", "age" : 40, "mobile" : 9421564732 }, "length" : "30 days" }
+{ "_id" : ObjectId("5db951d245079df59365bd62"), "subject" : "CN", "trainer" : { "name" : "Virat", "age" : 31, "mobile" : 9421667788 }, "length" : "30 days" }
+
+###OR
+db.mycol.find(
+   {
+      $or: [
+         {key1: value1}, {key2:value2}
+      ]
+   }
+).pretty()
+
+db.Classes.find({ $or : [{length : "30 days"}, {subject : "DBMS"}]}).pretty()
+{
+	"_id" : ObjectId("5db9515145079df59365bd60"),
+	"subject" : "ADS",
+	"trainer" : {
+		"name" : "Dhoni",
+		"age" : 40,
+		"mobile" : 9421564732
+	},
+	"length" : "30 days"
+}
+{
+	"_id" : ObjectId("5db951b745079df59365bd61"),
+	"subject" : "DBMS",
+	"trainer" : {
+		"name" : "Shailesh",
+		"age" : 20,
+		"mobile" : 9421663873
+	},
+	"lenght" : "20 days"
+}
+{
+	"_id" : ObjectId("5db951d245079df59365bd62"),
+	"subject" : "CN",
+	"trainer" : {
+		"name" : "Virat",
+		"age" : 31,
+		"mobile" : 9421667788
+	},
+	"length" : "30 days"
+}
+> 
+###NESTED
+db.Classes.find({"trainer.name" : "Shailesh"})
+
+{ "_id" : ObjectId("5db951b745079df59365bd61"), "subject" : "DBMS", "trainer" : { "name" : "Shailesh", "age" : 20, "mobile" : 9421663873 }, "lenght" : "20 days" }
+
+ 
+####QUERY FILTER
+{ <field1>: { <operator1>: <value1> }, ... }
+ db.Classes.find({ "trainer.age" : { $gt : 25}}).pretty()
+{
+	"_id" : ObjectId("5db9515145079df59365bd5f"),
+	"subject" : "OOP",
+	"trainer" : {
+		"name" : "Rohit",
+		"age" : 30
+	},
+	"length" : "15days",
+	"timing" : [
+		"1:00 pm",
+		"5:00 pm"
+	]
+}
+{
+	"_id" : ObjectId("5db9515145079df59365bd60"),
+	"subject" : "ADS",
+	"trainer" : {
+		"name" : "Dhoni",
+		"age" : 40,
+		"mobile" : 9421564732
+	},
+	"length" : "30 days"
+}
+{
+	"_id" : ObjectId("5db951d245079df59365bd62"),
+	"subject" : "CN",
+	"trainer" : {
+		"name" : "Virat",
+		"age" : 31,
+		"mobile" : 9421667788
+	},
+	"length" : "30 days"
+}
+> 
+###ARRAY FILTER
+{ <array field>: { <operator1>: <value1>, ... } }
+
+ db.Classes.find({timing : ["1:00 pm", "5:00 pm"]})
+{ "_id" : ObjectId("5db9515145079df59365bd5f"), "subject" : "OOP", "trainer" : { "name" : "Rohit", "age" : 30 }, "length" : "15days", "timing" : [ "1:00 pm", "5:00 pm" ] }
+
+
+db.Classes.find({"timing" : { $gt : "2:00 pm"}})
+{ "_id" : ObjectId("5db9515145079df59365bd5f"), "subject" : "OOP", "trainer" : { "name" : "Rohit", "age" : 30 }, "length" : "15days", "timing" : [ "1:00 pm", "5:00 pm" ] }
+{ "_id" : ObjectId("5db9691945079df59365bd63"), "subject" : "DSA", "trainer" : { "name" : "Shailesh", "age" : 20, "mobile" : 9421663873 }, "length" : "25 days", "timing" : [ "2:00 pm", "3:00 om" ] }
+
+###FIND PRINT SPECIFIC COLUMNS
+ db.Classes.find({}, {subject : 1, length : 1})
+{ "_id" : ObjectId("5db9515145079df59365bd5f"), "subject" : "OOP", "length" : "15days" }
+{ "_id" : ObjectId("5db9515145079df59365bd60"), "subject" : "ADS", "length" : "30 days" }
+{ "_id" : ObjectId("5db951b745079df59365bd61"), "subject" : "DBMS" }
+{ "_id" : ObjectId("5db951d245079df59365bd62"), "subject" : "CN", "length" : "30 days" }
+{ "_id" : ObjectId("5db9691945079df59365bd63"), "subject" : "DSA", "length" : "25 days" }
+> 
+
+db.Classes.find({ length : { $gt : "20 days"}}).pretty()
+{
+	"_id" : ObjectId("5db9515145079df59365bd60"),
+	"subject" : "ADS",
+	"trainer" : {
+		"name" : "Dhoni",
+		"age" : 40,
+		"mobile" : 9421564732
+	},
+	"length" : "30 days"
+}
+{
+	"_id" : ObjectId("5db951d245079df59365bd62"),
+	"subject" : "CN",
+	"trainer" : {
+		"name" : "Virat",
+		"age" : 31,
+		"mobile" : 9421667788
+	},
+	"length" : "30 days"
+}
+{
+	"_id" : ObjectId("5db9691945079df59365bd63"),
+	"subject" : "DSA",
+	"trainer" : {
+		"name" : "Shailesh",
+		"age" : 20,
+		"mobile" : 9421663873
+	},
+	"length" : "25 days",
+	"timing" : [
+		"2:00 pm",
+		"3:00 om"
+	]
+}
+> 
+#############################################UPDATE##########################################################
+Syntax
+
+The basic syntax of update() method is as follows −
+
+>db.COLLECTION_NAME.update(SELECTION_CRITERIA, UPDATED_DATA)
+
+
+
+
+> db.Classes.update({subject : "DSA"}, { $set : { "trainer.age" : 21 }})
+WriteResult({ "nMatched" : 1, "nUpserted" : 0, "nModified" : 1 })
+
+
+
+#####REMOVE A COLUMN
+> db.Classes.update({subject : "DBMS"}, {$unset : lenght})
+
+
+
+###MULTI
+> db.Classes.update({"trainer.name" : "Shailesh"}, {$set : { "trainer.age" : 20}}, {multi : true})
+
+
+###ADD ELEMENTS TO ARRAY
+
+ > db.Classes.update({timing :"1:00 pm"}, {$push : { timing : "3:00 pm"}})
+
+{
+  $push: {
+     <field>: {
+       $each: [ <value1>, <value2>, ... ],
+       $sort: <sort specification>
+     }
+  }
+
+
+> db.Classes.update({subject : "OOP"}, { $push : {timing : {$each : ["5:00 pm", "2:00 pm"], $sort : 1}}} )
+
+> db.Classes.update({subject : "OOP"}, {$push : { timing : { $each : ["2:00 pm"], $sort : 1} } })
+
+###REMOVE ELEMENTS
+
+
+> db.Classes.update({subject : "OOP"}, { $pull : {timing : "5:00 pm"}} )
+
+> db.Classes.update({subject : "OOP"}, {$pull : {timing : "5:00 pm"}}, {multi : true})
+
+
+###UPDATE MANY
+
+> db.Classes.updateMany({length : "30 days"}, {$set : { "trainer.age" : 35}}) 
+
+
+###ADD ELEMENT INSIDE EMBEDED 
+> db.Classes.update({subject : "OOP"}, {$set : {"trainer.height" : "180 cm"}})
+
+###REMOVE ELEMENT
+> db.Classes.update({subject : "OOP"}, {$unset : { "trainer.0" : 1}})
+
+
+###LIMIT  VALUE
+> db.Classes.find({}, {subject : 1, trainer : 1}).limit(2)
+{ "_id" : ObjectId("5db94d1bed3cdd68c764f6d3"), "subject" : "DBMS", "trainer" : { "name" : "Shailesh", "age" : 20, "mobile" : 9421663873 } }
+{ "_id" : ObjectId("5db94dffed3cdd68c764f6d4"), "subject" : "CN", "trainer" : { "name" : "Virat", "age" : 35, "mobile" : 9421667788 } }
+
+###SORT
+
+> db.Classes.find().sort({length : 1, subject : -1}).pretty()
+
+> db.Classes.find().sort({length : 1, subject : 1}).pretty()
+
+
+#######INDEX
+Syntax
+
+The basic syntax of ensureIndex() method is as follows().
+
+>db.COLLECTION_NAME.ensureIndex({KEY:1})
+
+> db.Classes.find({}, {_id : 0, subject : 1, trainer : 1, length : 1})
+        
+> db.Classes.update({length : "30 days"}, {$inc : {"trainer.age" : 3}}, {multi : true})
+
+> db.Classes.find({length : { $ne : "30 days"} } )
+
+> db.Classes.find({"trainer.age" : { $gt : 30 }}).pretty()
+
+#####START WITH D
+> db.Classes.find({subject :/^D/}).pretty()
+
+#####CONTAIN D
+> db.Classes.find({subject :/D/}).pretty()
+
+Here in the search criteria, we are using the ^ and $ character. The ^ is used to make sure that the string starts with a certain character, and $ is used to ensure that the string ends with a certain character. So when the code executes it will fetch only the string with the name "Guru99".
+
+###END WITH S
+> db.Classes.find({subject :/S$/}).pretty()
+
+> db.Classes.find({length : "30 days"}).count()
+
+> db.Classes.update({subject : "CN"}, {$set : { "trainer.id" : 4} })
+
+
+##########UPDATE ARRAY FIELD
+> db.Classes.update({subject : "OOP", timing : "2:00 pm"}, {$set : {"timing.$" : "2:45 pm"}})
+
+
+db.students.updateOne(
+   { _id: 1, grades: 80 },
+   { $set: { "grades.$" : 82 } }
+)
+
+
+##################ARRAY OF EMBEDED DOCUMENTS##########################################################
+
+{
+  _id: 4,
+  grades: [
+     { grade: 80, mean: 75, std: 8 },
+     { grade: 85, mean: 90, std: 5 },
+     { grade: 85, mean: 85, std: 8 }
+  ]
+}
+
+db.students.updateOne(
+   { _id: 4, "grades.grade": 85 },
+   { $set: { "grades.$.std" : 6 } }
+)
+
+
+

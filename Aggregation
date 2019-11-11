@@ -1,0 +1,217 @@
+Basic syntax of aggregate() method is as follows −
+
+>db.COLLECTION_NAME.aggregate(AGGREGATE_OPERATION)
+
+
+
+db.purchase_orders.insertMany(
+     [
+          {product: "toothbrush", total: 4.75, customer: "Mike"},
+          {product: "guitar", total: 199.99, customer: "Tom"},
+          {product: "milk", total: 11.33, customer: "Mike"},
+          {product: "pizza", total: 8.50, customer: "Karen"},
+          {product: "toothbrush", total: 4.75, customer: "Karen"},
+          {product: "pizza", total: 4.75, customer: "Dave"}
+          {product: "toothbrush", total: 4.75, customer: "Mike"},
+     ]
+)
+
+// find out how many toothbrushes were sold
+db.purchase_orders.count({product: "toothbrush"})
+
+// Find list of all products sold
+db.purchase_orders.distinct("product")
+
+// Find the total amount of money spent by each customer
+db.purchase_orders.aggregate(
+     [
+          {$match: {} },
+          {$group: {_id: "$customer", total: { $sum: "$total"} } }
+     ]
+)
+
+// Find how much has been spent on each product and     sort it by price
+db.purchase_orders.aggregate(
+     [
+          {$match: {} },
+          {$group: {_id: "$product", total: { $sum: "$total"} } },
+          {$sort: {total: -1}}
+     ]
+)
+
+// Find how much money each customer has spent on toothbrushes and pizza
+db.purchase_orders.aggregate(
+     [
+          {$match: {product: {$in: ["toothbrush", "pizza"]} } },
+          {$group: {_id: "$product", total: { $sum: "$total"} } },
+     ]
+)
+
+// https://docs.mongodb.com/manual/reference/operator/aggregation/
+// Show the list of all pipeline operators
+
+
+
+ db.createCollection("Order")
+{ "ok" : 1 }
+> db.Order.insert({product : "toothbrush", total : 20, name : "Shailesh", gender : "Male"}) 
+WriteResult({ "nInserted" : 1 })
+ db.Order.insert({product : "soap", total : 30, name : "Natasha", gender : "Female"})
+WriteResult({ "nInserted" : 1 })
+ db.Order.insert({product : "milk", total : 25, name : "Shailesh", gender : "Male"})
+WriteResult({ "nInserted" : 1 })
+ db.Order.insert({product : "cake", total : 100, name : "Virat", gender : "Male"})
+WriteResult({ "nInserted" : 1 })
+ db.Order.insert({product : "toothbrush", total : 20, name : "Virat", gender : "Male"})
+WriteResult({ "nInserted" : 1 })
+ db.Order.insert({product : "cake", total : 100, name : "Rohit", gender : "Male"})
+WriteResult({ "nInserted" : 1 })
+ db.Order.insert({product : "toothbrush", total : 20, name : "Shailesh", gender : "Male"})
+WriteResult({ "nInserted" : 1 })
+
+ db.Order.find().pretty()
+{
+	"_id" : ObjectId("5dbb0ba5ab79d2817a71dd40"),
+	"product" : "toothbrush",
+	"total" : 20,
+	"name" : "Shailesh",
+	"gender" : "Male"
+}
+{
+	"_id" : ObjectId("5dbb0bf7ab79d2817a71dd41"),
+	"product" : "soap",
+	"total" : 30,
+	"name" : "Natasha",
+	"gender" : "Female"
+}
+{
+	"_id" : ObjectId("5dbb0c3aab79d2817a71dd42"),
+	"product" : "milk",
+	"total" : 25,
+	"name" : "Shailesh",
+	"gender" : "Male"
+}
+{
+	"_id" : ObjectId("5dbb0c59ab79d2817a71dd43"),
+	"product" : "cake",
+	"total" : 100,
+	"name" : "Virat",
+	"gender" : "Male"
+}
+{
+	"_id" : ObjectId("5dbb0c7aab79d2817a71dd44"),
+	"product" : "toothbrush",
+	"total" : 20,
+	"name" : "Virat",
+	"gender" : "Male"
+}
+{
+	"_id" : ObjectId("5dbb0c9aab79d2817a71dd45"),
+	"product" : "cake",
+	"total" : 100,
+	"name" : "Rohit",
+	"gender" : "Male"
+}
+{
+	"_id" : ObjectId("5dbb0cc4ab79d2817a71dd46"),
+	"product" : "toothbrush",
+	"total" : 20,
+	"name" : "Shailesh",
+	"gender" : "Male"
+}
+
+1.Total price for each person   
+
+db.Order.aggregate([{$group : {_id : "$name", total_price : { $sum : "$total"}}}])
+{ "_id" : "Natasha", "total_price" : 30 }
+{ "_id" : "Virat", "total_price" : 120 }
+{ "_id" : "Shailesh", "total_price" : 65 }
+{ "_id" : "Rohit", "total_price" : 100 }
+
+2.Distinct products
+
+ db.Order.aggregate([ { $group :  {_id : "$product"}}])
+{ "_id" : "toothbrush" }
+{ "_id" : "soap" }
+{ "_id" : "milk" }
+{ "_id" : "cake" }
+> 
+
+
+3.Distinct Persons
+
+ db.Order.aggregate([ { $group :  {_id : "$name"}}])
+{ "_id" : "Natasha" }
+{ "_id" : "Virat" }
+{ "_id" : "Shailesh" }
+{ "_id" : "Rohit" }
+> 
+
+4.Total price for each product
+ db.Order.aggregate([{$group : {_id : "$product", total_price : { $sum : "$total"}}}])
+{ "_id" : "toothbrush", "total_price" : 60 }
+{ "_id" : "soap", "total_price" : 30 }
+{ "_id" : "milk", "total_price" : 25 }
+{ "_id" : "cake", "total_price" : 200 }
+
+5.Each product bought
+> db.Order.aggregate([{$group : {_id : "$name", prices : { $push : "$total"}}}])
+{ "_id" : "Natasha", "prices" : [ 30 ] }
+{ "_id" : "Virat", "prices" : [ 100, 20 ] }
+{ "_id" : "Shailesh", "prices" : [ 20, 25, 20 ] }
+{ "_id" : "Rohit", "prices" : [ 100 ] }
+> 
+
+6.Total cost
+> db.Order.aggregate([{$group:{_id:null, total : {$sum : "$total"}}}])
+{ "_id" : null, "total" : 315 }
+
+7.Average money sent
+> db.Order.aggregate([{$group : {_id : "$name", prices : { $avg : "$total"}}}])
+{ "_id" : "Natasha", "prices" : 30 }
+{ "_id" : "Virat", "prices" : 60 }
+{ "_id" : "Shailesh", "prices" : 21.666666666666668 }
+{ "_id" : "Rohit", "prices" : 100 }
+
+
+8.first
+> db.Order.aggregate([{$group : {_id : "$name", prices : { $first : "$total"}}}])
+{ "_id" : "Natasha", "prices" : 30 }
+{ "_id" : "Virat", "prices" : 100 }
+{ "_id" : "Shailesh", "prices" : 20 }
+{ "_id" : "Rohit", "prices" : 100 }
+
+9.last
+> db.Order.aggregate([{$group : {_id : "$name", prices : { $last : "$total"}}}])
+{ "_id" : "Natasha", "prices" : 30 }
+{ "_id" : "Virat", "prices" : 20 }
+{ "_id" : "Shailesh", "prices" : 20 }
+{ "_id" : "Rohit", "prices" : 100 }
+
+10.Distinct Products Bought
+> db.Order.aggregate([{$group : {_id : "$name", prices : { $addToSet : "$product"}}}])
+{ "_id" : "Natasha", "prices" : [ "soap" ] }
+{ "_id" : "Virat", "prices" : [ "toothbrush", "cake" ] }
+{ "_id" : "Shailesh", "prices" : [ "toothbrush", "milk" ] }
+{ "_id" : "Rohit", "prices" : [ "cake" ] }
+> 
+
+11.Product bought by each person
+> db.Order.aggregate([{$group : {_id : "$product", prices : { $addToSet : "$name"}}}])
+{ "_id" : "toothbrush", "prices" : [ "Virat", "Shailesh" ] }
+{ "_id" : "soap", "prices" : [ "Natasha" ] }
+{ "_id" : "milk", "prices" : [ "Shailesh" ] }
+{ "_id" : "cake", "prices" : [ "Virat", "Rohit" ] }
+
+
+
+
+
+
+
+
+
+
+
+
+
