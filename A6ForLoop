@@ -1,0 +1,34 @@
+CREATE TABLE Employee(Emp_id NUMBER PRIMARY KEY, Name VARCHAR(20), Salary NUMBER);
+
+CREATE TABLE EmployeeNew(Emp_id NUMBER PRIMARY KEY, Name VARCHAR(20), Salary NUMBER);
+
+INSERT INTO Employee VALUES(101, 'Shailesh', 50000);
+INSERT INTO Employee VALUES(102, 'Virat', 25000);
+INSERT INTO Employee VALUES(103, 'Rohit', 20000);
+INSERT INTO Employee VALUES(104, 'Dhoni', 15000);
+INSERT INTO Employee VALUES(105, 'Rahul', 10000);
+
+SELECT * FROM Employee;
+
+DECLARE
+    CURSOR Old IS SELECT * FROM Employee;
+    CURSOR NewC IS SELECT * FROM EmployeeNew;
+    flag Number;
+
+BEGIN
+    FOR rec1 IN Old
+    LOOP
+        flag := 0;
+        FOR rec2 IN NewC
+        LOOP
+            IF rec1.Emp_id = rec2.Emp_id THEN
+                flag := 1;
+            END IF;
+        END LOOP;
+        IF flag=0 THEN
+            INSERT INTO EmployeeNew VALUES(rec1.Emp_id, rec1.Name, rec1.Salary);
+        END IF;
+    END LOOP;
+
+END;
+
